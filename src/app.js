@@ -196,9 +196,10 @@ const server = app.listen(3000, () => {
       });
       console.log('Client do Twitter criado');
 
-      TwitterService.listarTweetsHitBRA()
+      TwitterService.listarTweetsHitBRA('@HitBra')
         .then(tweets => {
           console.log(`Recebido ${tweets.length} para processar`);
+          
           /*
             *** Implemente aqui sua lógica para ler o tweets ***
             
