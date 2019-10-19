@@ -3,8 +3,29 @@ const mysql = require('mysql');
 let conexao = null;
 
 module.exports = {
-  conectar
+  conectar,
+  inserirTweet,
+  listaEventosPorEmpresa
+
 }
+
+function inserirTweet(empresa)
+{
+  return new Promise((resolve, reject) => {
+
+  const sql = `INSERT INTO empresas set nome = ?`;
+
+    conexao.query(sql, [empresa] , (erro, results, fields) => {
+      if (erro) {
+        reject(erro);
+      } else {
+        resolve(results);
+      }
+    });
+
+  });
+}
+
 
 function conectar(options) {
   if (conexao == null) {
@@ -36,3 +57,27 @@ function conectar(options) {
     return Promise.resolve(conexao);
   }
 }
+function listaEventosPorEmpresa() {
+  return new Promise((resolve, reject) => {
+    const sql = 'SELECT * FROM AGENDA_EVENTOS ORDER BY data_evento';
+
+    conexao.query(sql, (erro, results, fields) => {
+      if (erro) {
+        reject(erro);
+      } else {
+        resolve(
+          results.map(registroEvento => {
+            return {
+              id: registroEvento.id,
+              tipo_evento: registroEvento.tipo_evento,
+              descricao: registroEvento.descricao,
+              data_evento: registroEvento.data_evento,
+              horario: registroEvento.horario
+            }
+          })
+        );
+      }
+    });
+  });
+}
+

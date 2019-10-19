@@ -8,6 +8,28 @@ const app = express();
 app.use(express.json());
 
 app.get('/listaEventosPorEmpresa', (request, response) => {
+
+  let promiseBuscaBanco = null;
+  if (request.query.empresa != null) {
+  promiseBuscaBanco = DbService.listaEventosPorEmpresa(request.query.empresa);
+  
+  promiseBuscaBanco
+   .then(Agenda_Eventos => {
+     if (Agenda_Eventos.length > 0) {
+       response.send(Agenda_Eventos);
+     } else {
+       response.status(204).send();
+     }
+   })
+   .catch(erro => {
+     console.error('Erro ao listar eventos', erro);
+     response.status(500).send("Ocorreu um erro ao listar eventos do banco de dados");
+   });
+  } else {
+    console.error('Erro ao listar eventos');
+    response.status(500).send("Ocorreu um erro ao listar eventos do banco de dados");
+  }
+  
   /*
     entrada:
     {
@@ -181,7 +203,7 @@ const server = app.listen(3000, () => {
   DbService.conectar({
     host: 'localhost', 
     porta: 3306, 
-    banco: 'pet_shop', 
+    banco: 'DESAFIO', 
     usuario: 'root', 
     senha: '123456'
   })
@@ -196,11 +218,72 @@ const server = app.listen(3000, () => {
       });
       console.log('Client do Twitter criado');
 
-      TwitterService.listarTweetsHitBRA('@HitBra')
+      TwitterService.listarTweetsHitBRA('')
         .then(tweets => {
+          const tipos = ['festa','churrasco','reunião','férias']; 
           console.log(`Recebido ${tweets.length} para processar`);
-          
-          /*
+          let ok = true;
+          tweets.forEach(element => {
+            if (element.hashtags.includes('hackathonhitbra'))
+            {
+              if (element.texto.includes('*'))
+              {
+                //separando as palavras em um array
+                const array = element.texto.split(' ');
+                let empresa = array[1];
+                //Tratamento de tipos
+                if (tipos.includes(array[2]))
+                { 
+                  let tipoEvento = array[2];  
+                }
+                else
+                {
+                  ok = false; 
+                  console.log(`Tipo de evento inválido: ${array[2]}`);    
+                }
+
+                let data = (array[3]);
+                let horario = (array[4]);
+                let descricao = '';
+
+                let i = 5;
+                while (!(array[i].includes('*')))
+                {
+                  descricao = `${descricao} ${array[i]}`;
+                  i++;
+                }
+                descricao.trim;
+                i++;
+                const nomes = [];
+                let j = 0;
+                while ((i<(array.length)))
+                {
+                  if (array[i].includes('*'))
+                  {
+                    nomes[j] = array[i];
+                    i++;
+                    j++;
+                  }
+                  else
+                  {
+                    ok = false; 
+                    console.log(`nome inválido:`)
+                  }
+
+                  if (ok)
+                  { 
+                     DbService.inserirTweet(empresa);                                    
+                  } 
+                }
+              }
+            }
+            else{
+                  ok = false;
+                  console.log('tweet inválido');
+                }
+     
+          });
+          /* "texto": "#hackathonhitbra hitbra festa 10/11/2019 21:00 vamos comemorar o hackathon  *marcos *rubens *giovane"
             *** Implemente aqui sua lógica para ler o tweets ***
             
             O parâmetro "tweets" é um array de objetos com a seguinte estrutura:
